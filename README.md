@@ -17,6 +17,16 @@ To run your own instance of this bot with Docker, use the following command. You
 nerdctl run -d --name=SongLinkBot -e BOT_TOKEN="YOUR_BOT_TOKEN" ghcr.io/micahmo/songlinkbot:latest
 ```
 
+### Unraid
+
+You can also run your own instance of this bot in Unraid.
+1. In Unraid, go to the Docker tab.
+2. Scroll to the bottom and edit the "Template Repositories" area.
+3. Add https://github.com/micahmo/SongLinkBot on a new line and press Save.
+4. Choose Add Container.
+5. In the Template drop down, choose SongLinkBot from the list.
+6. Set variables as desired and Apply.
+
 # Attribution
 
 Thanks to the great service [song.link](https://song.link), which actually finds all of the corresopnding links.
