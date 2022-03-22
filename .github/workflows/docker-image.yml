@@ -13,7 +13,7 @@ jobs:
       run: |
         [[ $GITHUB_REF_NAME = "main" ]] && TAG="latest" || TAG=$GITHUB_REF_NAME
         TAG="${TAG//\//$'-'}"
-        docker build . --file SongLinkBot\Dockerfile --tag ghcr.io/"${GITHUB_REPOSITORY,,}":$TAG
+        docker build . --file SongLinkBot/Dockerfile --tag ghcr.io/"${GITHUB_REPOSITORY,,}":$TAG
     
     # Push
     - name: Push image
