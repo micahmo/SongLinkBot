@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container>
+  <TemplateURL>https://raw.githubusercontent.com/micahmo/SongLinkBot/main/docker-template/SongLinkBot.xml</TemplateURL>
+  <Name>SongLinkBot</Name>
+  <Project>https://github.com/micahmo/SongLinkBot/</Project>
+  <Overview>
+    A Telegram Bot that converts Spotify and YouTube Music song links
+  </Overview>
+  <Description>
+    A Telegram Bot that converts Spotify and YouTube Music song links
+  </Description>
+  <Registry>https://github.com/micahmo/SongLinkBot/pkgs/container/songlinkbot</Registry>
+  <GitHub>https://github.com/micahmo/SongLinkBot/</GitHub>
+  <Repository>ghcr.io/micahmo/songlinkbot</Repository>
+  <!-- Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> -->
+  <Icon>https://raw.githubusercontent.com/micahmo/SongLinkBot/main/docker-template/songlinkbot-icon.png</Icon>
+  <Networking>
+    <Mode>host</Mode>
+  </Networking>
+  <Config Name="Bot Token" Target="BOT_TOKEN" Default="" Mode="" Description="Telegram Bot Token" Type="Variable" Display="always" Required="true" Mask="false"></Config>
+</Container>
