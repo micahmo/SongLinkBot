@@ -9,6 +9,8 @@ SongLinkBot is a Telegram bot that listens for song links and finds correspondin
 
 Add [@mdmSongLinkBot](https://t.me/mdmSongLinkBot) to your chats. When it detects a song link from either Spotify or YouTube Music, it sends a message to the chat with corresponding links to the other service. It also includes a link to the song's landing page on [song.link](https://song.link), which includes many other services.
 
+![image](https://user-images.githubusercontent.com/7417301/159551161-b5ccff43-b69c-4156-8ef9-24c278b77650.png)
+
 ## Running
 
 To run your own instance of this bot with Docker, use the following command. You will have to create a Telegram bot and obtain the token.
