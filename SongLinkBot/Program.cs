@@ -49,17 +49,21 @@ namespace SongLinkBot
             {
                 if (update.Message?.Text?.Contains("open.spotify.com/track", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    Console.WriteLine($"Received Spotify link from chat {update.Message.Chat.Username} ({update.Message.Chat.Id}): {update.Message?.Text}");
+                    Console.WriteLine($"Received Spotify link from chat - Username: {update.Message.Chat.Username}, Title: {update.Message.Chat.Title}, Id: {update.Message.Chat.Id} - {update.Message?.Text}");
+
+                    // Parse the Spotify link from the message
+                    string? spotifyLink = SpotifyMessageLinkRegex.Match(update.Message.Text).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
+                    Console.WriteLine($"Parsed Spotify link \"{spotifyLink}\" from message \"{update.Message.Text}\"");
 
                     string? spotifyId = default;
                     try
                     {
-                        Uri uri = new Uri(update.Message?.Text);
+                        Uri uri = new Uri(spotifyLink);
                         spotifyId = uri.Segments[2];
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Received error parsing link: {ex}");
+                        Console.WriteLine($"Received error parsing Spotify ID from link: {ex}");
                     }
 
                     if (!string.IsNullOrEmpty(spotifyId))
@@ -67,24 +71,27 @@ namespace SongLinkBot
                         await ScrapeSongLink(botClient, update.Message.Chat.Id, $"https://song.link/s/{spotifyId}", cancellationToken);
                     }
 
-                    Console.WriteLine($"Finished processing {update.Message?.Text}{Environment.NewLine}");
+                    Console.WriteLine($"Finished processing \"{update.Message?.Text}\"{Environment.NewLine}");
                 }
                 else if (update.Message?.Text?.Contains("music.youtube.com/watch", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    Console.WriteLine($"Received YouTube Music link from chat {update.Message.Chat.Username} ({update.Message.Chat.Id}): {update.Message?.Text}");
+                    Console.WriteLine($"Received YouTube Music link from chat - Username: {update.Message.Chat.Username}, Title: {update.Message.Chat.Title}, Id: {update.Message.Chat.Id} - {update.Message?.Text}");
 
-                    string? youtubeId = YoutubeIdRegex.Match(new Uri(update.Message?.Text).Query).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
+                    string? youtubeMusicLink = YoutubeMusicMessageLinkRegex.Match(update.Message.Text).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
+                    Console.WriteLine($"Parsed YouTube Music link \"{youtubeMusicLink}\" from message \"{update.Message.Text}\"");
+
+                    string? youtubeId = YoutubeIdRegex.Match(new Uri(youtubeMusicLink).Query).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
 
                     if (string.IsNullOrEmpty(youtubeId))
                     {
-                        Console.WriteLine("Unable to get YouTube ID from URL.");
+                        Console.WriteLine($"Unable to get YouTube ID from URL {youtubeMusicLink}.");
                     }
                     else
                     {
                         await ScrapeSongLink(botClient, update.Message.Chat.Id, $"https://song.link/y/{youtubeId}", cancellationToken);
                     }
 
-                    Console.WriteLine($"Finished processing {update.Message?.Text}{Environment.NewLine}");
+                    Console.WriteLine($"Finished processing \"{update.Message?.Text}\"{Environment.NewLine}");
                 }
             }
         }
@@ -99,25 +106,25 @@ namespace SongLinkBot
                 return;
             }
             
-            string youtubeMusicLink = YoutubeMusicRegex.Match(songLinkPageContents).Value;
+            string youtubeMusicLink = YoutubeMusicSongLinkRegex.Match(songLinkPageContents).Value;
             if (string.IsNullOrEmpty(youtubeMusicLink))
             {
                 Console.WriteLine($"Couldn't get YouTube Music link for {songLink}");
             }
 
-            string? spotifyLink = SpotifyRegex.Match(songLinkPageContents).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
+            string? spotifyLink = SpotifySongLinkRegex.Match(songLinkPageContents).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
             if (string.IsNullOrEmpty(youtubeMusicLink))
             {
                 Console.WriteLine($"Couldn't get Spotify link for {songLink}");
             }
 
-            string? albumArtLink = HttpUtility.UrlDecode(AlbumArtRegex.Match(songLinkPageContents).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value);
+            string? albumArtLink = HttpUtility.UrlDecode(AlbumArtSongLinkRegex.Match(songLinkPageContents).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value);
             if (string.IsNullOrEmpty(albumArtLink))
             {
                 Console.WriteLine($"Couldn't get Album Art link for {songLink}");
             }
 
-            string? songName = SongNameRegex.Match(songLinkPageContents).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
+            string? songName = SongNameSongLinkRegex.Match(songLinkPageContents).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
             if (string.IsNullOrEmpty(songName))
             {
                 Console.WriteLine($"Couldn't get Song name for {songLink}");
@@ -159,13 +166,17 @@ namespace SongLinkBot
 
         private static readonly HttpClient HttpClient = new();
 
-        private static readonly Regex YoutubeMusicRegex = new(@"https:\/\/music.youtube.com\/watch\?v=.{11}");
+        private static readonly Regex YoutubeMusicSongLinkRegex = new(@"https:\/\/music.youtube.com\/watch\?v=.{11}");
 
-        private static readonly Regex SpotifyRegex = new("(https:\\/\\/open\\.spotify\\.com.*?)\\\"");
+        private static readonly Regex SpotifySongLinkRegex = new("(https:\\/\\/open\\.spotify\\.com.*?)\\\"");
 
-        private static readonly Regex AlbumArtRegex = new("imagesrcset=\"\\/_next\\/image\\?url=(https.*?)&");
+        private static readonly Regex AlbumArtSongLinkRegex = new("imagesrcset=\"\\/_next\\/image\\?url=(https.*?)&");
 
-        private static readonly Regex SongNameRegex = new(@"<title>(.*?)<\/title>");
+        private static readonly Regex SongNameSongLinkRegex = new(@"<title>(.*?)<\/title>");
+
+        private static readonly Regex SpotifyMessageLinkRegex = new(@"(https:\/\/open\.spotify\.com.*?)(\s|\z)");
+
+        private static readonly Regex YoutubeMusicMessageLinkRegex = new(@"(https:\/\/music\.youtube\.com.*?)(\s|\z)");
 
         private static readonly Regex YoutubeIdRegex = new("=(.*?)(&|\\z)");
     }
