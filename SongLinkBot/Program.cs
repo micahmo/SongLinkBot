@@ -52,46 +52,53 @@ namespace SongLinkBot
                     Console.WriteLine($"Received Spotify link from chat - Username: {update.Message.Chat.Username}, Title: {update.Message.Chat.Title}, Id: {update.Message.Chat.Id} - {update.Message?.Text}");
 
                     // Parse the Spotify link from the message
-                    string? spotifyLink = SpotifyMessageLinkRegex.Match(update.Message.Text).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
-                    Console.WriteLine($"Parsed Spotify link \"{spotifyLink}\" from message \"{update.Message.Text}\"");
-
-                    string? spotifyId = default;
-                    try
+                    foreach (Match? match in SpotifyMessageLinkRegex.Matches(update.Message.Text))
                     {
-                        Uri uri = new Uri(spotifyLink);
-                        spotifyId = uri.Segments[2];
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Received error parsing Spotify ID from link: {ex}");
-                    }
+                        string? spotifyLink = match?.Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
+                        Console.WriteLine($"Parsed Spotify link \"{spotifyLink}\" from message \"{update.Message.Text}\"");
 
-                    if (!string.IsNullOrEmpty(spotifyId))
-                    {
-                        await ScrapeSongLink(botClient, update.Message.Chat.Id, $"https://song.link/s/{spotifyId}", cancellationToken);
-                    }
+                        string? spotifyId = default;
+                        try
+                        {
+                            Uri uri = new Uri(spotifyLink);
+                            spotifyId = uri.Segments[2];
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Received error parsing Spotify ID from link: {ex}");
+                        }
 
-                    Console.WriteLine($"Finished processing \"{update.Message?.Text}\"{Environment.NewLine}");
+                        if (!string.IsNullOrEmpty(spotifyId))
+                        {
+                            await ScrapeSongLink(botClient, update.Message.Chat.Id, $"https://song.link/s/{spotifyId}", cancellationToken);
+                        }
+
+                        Console.WriteLine($"Finished processing \"{update.Message?.Text}\"{Environment.NewLine}");
+                    }
                 }
-                else if (update.Message?.Text?.Contains("music.youtube.com/watch", StringComparison.OrdinalIgnoreCase) == true)
+                
+                if (update.Message?.Text?.Contains("music.youtube.com/watch", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     Console.WriteLine($"Received YouTube Music link from chat - Username: {update.Message.Chat.Username}, Title: {update.Message.Chat.Title}, Id: {update.Message.Chat.Id} - {update.Message?.Text}");
 
-                    string? youtubeMusicLink = YoutubeMusicMessageLinkRegex.Match(update.Message.Text).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
-                    Console.WriteLine($"Parsed YouTube Music link \"{youtubeMusicLink}\" from message \"{update.Message.Text}\"");
-
-                    string? youtubeId = YoutubeIdRegex.Match(new Uri(youtubeMusicLink).Query).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
-
-                    if (string.IsNullOrEmpty(youtubeId))
+                    foreach (Match? match in YoutubeMusicMessageLinkRegex.Matches(update.Message.Text))
                     {
-                        Console.WriteLine($"Unable to get YouTube ID from URL {youtubeMusicLink}.");
-                    }
-                    else
-                    {
-                        await ScrapeSongLink(botClient, update.Message.Chat.Id, $"https://song.link/y/{youtubeId}", cancellationToken);
-                    }
+                        var youtubeMusicLink = match?.Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
+                        Console.WriteLine($"Parsed YouTube Music link \"{youtubeMusicLink}\" from message \"{update.Message.Text}\"");
 
-                    Console.WriteLine($"Finished processing \"{update.Message?.Text}\"{Environment.NewLine}");
+                        string? youtubeId = YoutubeIdRegex.Match(new Uri(youtubeMusicLink).Query).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
+
+                        if (string.IsNullOrEmpty(youtubeId))
+                        {
+                            Console.WriteLine($"Unable to get YouTube ID from URL {youtubeMusicLink}.");
+                        }
+                        else
+                        {
+                            await ScrapeSongLink(botClient, update.Message.Chat.Id, $"https://song.link/y/{youtubeId}", cancellationToken);
+                        }
+
+                        Console.WriteLine($"Finished processing \"{update.Message?.Text}\"{Environment.NewLine}");
+                    }
                 }
             }
         }
