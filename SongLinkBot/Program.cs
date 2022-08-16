@@ -131,7 +131,7 @@ namespace SongLinkBot
                 Console.WriteLine($"Couldn't get Album Art link for {songLink}");
             }
 
-            string? songName = SongNameSongLinkRegex.Match(songLinkPageContents).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value;
+            string? songName = HttpUtility.HtmlDecode(SongNameSongLinkRegex.Match(songLinkPageContents).Groups.OfType<Capture>().Skip(1).FirstOrDefault()?.Value);
             if (string.IsNullOrEmpty(songName))
             {
                 Console.WriteLine($"Couldn't get Song name for {songLink}");
